@@ -26,10 +26,11 @@ class Application(private val terminal: Terminal) {
     }
 
     fun run() {
-        drawFrame(0, 0, height - 1, width - 1)
+        /*drawFrame(0, 0, height - 1, width - 1)*/
         drawPipes()
     }
 
+/*
     private fun drawFrame(firstRow: Int, firstColumn: Int, lastRow: Int, lastColumn: Int) {
         for (row in firstRow..lastRow) {
             for (column in firstColumn..lastColumn) {
@@ -52,6 +53,7 @@ class Application(private val terminal: Terminal) {
 
         terminal.flush()
     }
+*/
 
     private fun drawPipes() {
         val concurrentPipes = 1
@@ -78,14 +80,14 @@ class Application(private val terminal: Terminal) {
     }
 
     private suspend fun drawPipe(startX: Int, color: TextColor) {
-        val xRange = 1 until (width - 1)
-        val yRange = 1 until (height - 1)
+        val xRange = 0 until width
+        val yRange = 0 until height
 
-        val startY = (height - 1) - 1
+        val startY = height - 1
 
         terminal.setForegroundColor(color)
 
-        var growingDirection = GrowingDirection.Up
+        var growingDirection = Up
         var x = startX
         var y = startY
         var canBuildMore = true
