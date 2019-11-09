@@ -8,3 +8,6 @@ fun Terminal.println(str: String) {
     }
     flush()
 }
+
+val Terminal.minRow get() = 0
+val Terminal.maxRow get() = terminalSize.rows - 1

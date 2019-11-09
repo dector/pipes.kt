@@ -1,15 +1,26 @@
 package io.github.dector.pipes
 
 import com.googlecode.lanterna.terminal.Terminal
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlin.random.Random
+import kotlin.random.nextInt
 
 class Application(private val terminal: Terminal) {
+
+    private val width = terminal.terminalSize.columns
+    private val height = terminal.terminalSize.rows
+
+    private val scope = CoroutineScope(SupervisorJob())
 
     init {
         terminal.setCursorVisible(false)
     }
 
     fun run() {
-        drawFrame(0, 0, terminal.terminalSize.rows - 1, terminal.terminalSize.columns - 1)
+        drawFrame(0, 0, height - 1, width - 1)
         drawPipes()
     }
 
@@ -32,9 +43,39 @@ class Application(private val terminal: Terminal) {
                 }
             }
         }
+
+        terminal.flush()
     }
 
     private fun drawPipes() {
+        scope.launch {
+            while(true) {
+                val x = Random.nextInt(1 until (width-1))
 
+                drawPipe(x)
+            }
+        }
+
+    }
+
+    private suspend fun drawPipe(startX: Int) {
+        val xRange = 1 until (width - 1)
+        val yRange = 1 until (height - 1)
+
+        val startY = (height - 1) - 1
+
+        var x = startX
+        var y = startY
+        var canBuildMore = true
+        while (canBuildMore) {
+            terminal.setCursorPosition(startX, y)
+            terminal.putCharacter('*')
+            terminal.flush()
+
+            y--
+            canBuildMore = (x in xRange) && (y in yRange)
+
+            delay(20)
+        }
     }
 }
