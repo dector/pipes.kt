@@ -2,32 +2,28 @@ package io.github.dector.pipes
 
 import com.googlecode.lanterna.terminal.Terminal
 
-class Application(private val terminal : Terminal) {
+class Application(private val terminal: Terminal) {
 
     init {
         terminal.setCursorVisible(false)
     }
 
     fun run() {
-        drawFrame()
+        drawFrame(0, 0, terminal.terminalSize.rows - 1, terminal.terminalSize.columns - 1)
+        drawPipes()
     }
 
-    private fun drawFrame() {
-        val size = terminal.terminalSize
-
-        val lastRow = size.rows - 1
-        val lastColumn = size.columns - 1
-
-        for (row in 0..lastRow) {
-            for (column in 0..lastColumn) {
+    private fun drawFrame(firstRow: Int, firstColumn: Int, lastRow: Int, lastColumn: Int) {
+        for (row in firstRow..lastRow) {
+            for (column in firstColumn..lastColumn) {
 
                 val char = when {
-                    row == 0 && column == 0 -> '╔'
-                    row == 0 && column == lastColumn -> '╗'
-                    row == lastRow && column == 0 -> '╚'
+                    row == firstRow && column == firstColumn -> '╔'
+                    row == firstRow && column == lastColumn -> '╗'
+                    row == lastRow && column == firstColumn -> '╚'
                     row == lastRow && column == lastColumn -> '╝'
-                    row == 0 || row == lastRow -> '═'
-                    column == 0 || column == lastColumn -> '║'
+                    row == firstRow || row == lastRow -> '═'
+                    column == firstColumn || column == lastColumn -> '║'
                     else -> null
                 }
                 if (char != null) {
@@ -36,5 +32,9 @@ class Application(private val terminal : Terminal) {
                 }
             }
         }
+    }
+
+    private fun drawPipes() {
+
     }
 }
