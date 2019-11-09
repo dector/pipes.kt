@@ -87,17 +87,19 @@ class Application(private val terminal: Terminal) {
 
         terminal.setForegroundColor(color)
 
-        var growingDirection = Up
+        val growingDirections = arrayOf(Up, Up)
         var x = startX
         var y = startY
         var canBuildMore = true
         while (canBuildMore) {
+            val char = pipeSegmentChar(growingDirections)
+
             terminal.setCursorPosition(x, y)
-            terminal.putCharacter('█')
+            terminal.putCharacter(char)
             terminal.flush()
 
-            growingDirection = nextDirection(growingDirection)
-            when (growingDirection) {
+            growingDirections.shiftLeft { nextDirection(growingDirections.last()) }
+            when (growingDirections.first()) {
                 Left -> x--
                 Right -> x++
                 Up -> y--
@@ -135,4 +137,43 @@ private fun nextDirection(currentDirection: GrowingDirection): GrowingDirection 
             Down -> Left
         }
     }
+}
+
+private fun pipeSegmentChar(directions: Array<GrowingDirection>): Char {
+    val a = directions.first()
+    val b = directions.last()
+
+    return when (a) {
+        Up -> when (b) {
+            Up -> '║'
+            Down -> '║'
+            Left ->'╗'
+            Right -> '╔'
+        }
+        Down -> when (b) {
+            Up -> '║'
+            Down -> '║'
+            Left -> '╝'
+            Right -> '╚'
+        }
+        Left -> when (b) {
+            Up -> '╚'
+            Down -> '╔'
+            Left -> '═'
+            Right -> '═'
+        }
+        Right -> when (b) {
+            Up -> '╝'
+            Down -> '╗'
+            Left -> '═'
+            Right -> '═'
+        }
+    }
+}
+
+private fun <T> Array<T>.shiftLeft(newValue: () -> T) {
+    for (i in 1..lastIndex) {
+        this[i - 1] = this[i]
+    }
+    this[lastIndex] = newValue()
 }
