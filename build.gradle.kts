@@ -33,5 +33,5 @@ val test by tasks.getting(Test::class) {
 }
 
 application {
-    mainClassName = "io.github.dector.pipes.ApplicationKt"
+    mainClassName = "io.github.dector.pipes.MainKt"
 }
