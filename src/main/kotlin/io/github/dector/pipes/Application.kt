@@ -123,7 +123,7 @@ class Application(private val terminal: Terminal) {
 
             canBuildMore = (x in xRange) && (y in yRange)
 
-            delay(1000)
+            delay(20)
         }
     }
 }
