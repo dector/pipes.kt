@@ -1,5 +1,7 @@
 package io.github.dector.pipes
 
+import com.googlecode.lanterna.TextColor
+import com.googlecode.lanterna.TextColor.ANSI
 import com.googlecode.lanterna.terminal.Terminal
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
@@ -51,25 +53,29 @@ class Application(private val terminal: Terminal) {
         scope.launch {
             while(true) {
                 val x = Random.nextInt(1 until (width-1))
+                val color = listOf(ANSI.BLUE, ANSI.RED, ANSI.YELLOW, ANSI.MAGENTA, ANSI.GREEN, ANSI.MAGENTA)
+                    .random()
 
-                drawPipe(x)
+                drawPipe(x, color)
             }
         }
 
     }
 
-    private suspend fun drawPipe(startX: Int) {
+    private suspend fun drawPipe(startX: Int, color: TextColor) {
         val xRange = 1 until (width - 1)
         val yRange = 1 until (height - 1)
 
         val startY = (height - 1) - 1
+
+        terminal.setForegroundColor(color)
 
         var x = startX
         var y = startY
         var canBuildMore = true
         while (canBuildMore) {
             terminal.setCursorPosition(startX, y)
-            terminal.putCharacter('*')
+            terminal.putCharacter('█')
             terminal.flush()
 
             y--
