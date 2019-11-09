@@ -3,6 +3,10 @@ package io.github.dector.pipes
 import com.googlecode.lanterna.TextColor
 import com.googlecode.lanterna.TextColor.ANSI
 import com.googlecode.lanterna.terminal.Terminal
+import io.github.dector.pipes.GrowingDirection.Down
+import io.github.dector.pipes.GrowingDirection.Left
+import io.github.dector.pipes.GrowingDirection.Right
+import io.github.dector.pipes.GrowingDirection.Up
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
@@ -51,8 +55,8 @@ class Application(private val terminal: Terminal) {
 
     private fun drawPipes() {
         scope.launch {
-            while(true) {
-                val x = Random.nextInt(1 until (width-1))
+            while (true) {
+                val x = Random.nextInt(1 until (width - 1))
                 val color = listOf(ANSI.BLUE, ANSI.RED, ANSI.YELLOW, ANSI.MAGENTA, ANSI.GREEN, ANSI.MAGENTA)
                     .random()
 
@@ -70,18 +74,40 @@ class Application(private val terminal: Terminal) {
 
         terminal.setForegroundColor(color)
 
+        var growingDirection = GrowingDirection.Up
         var x = startX
         var y = startY
         var canBuildMore = true
         while (canBuildMore) {
-            terminal.setCursorPosition(startX, y)
+            terminal.setCursorPosition(x, y)
             terminal.putCharacter('█')
             terminal.flush()
 
-            y--
+            growingDirection = nextDirection(growingDirection)
+            when (growingDirection) {
+                Left -> x--
+                Right -> x++
+                Up -> y--
+                Down -> y++
+            }
+
             canBuildMore = (x in xRange) && (y in yRange)
 
             delay(20)
         }
     }
+}
+
+private enum class GrowingDirection {
+    Left, Right, Up, Down
+}
+
+private fun nextDirection(currentDirection: GrowingDirection): GrowingDirection {
+    var newDirection: GrowingDirection = GrowingDirection.values().random()
+
+    while (newDirection == currentDirection) {
+        newDirection = GrowingDirection.values().random()
+    }
+
+    return newDirection
 }
