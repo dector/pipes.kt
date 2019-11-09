@@ -2,6 +2,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     kotlin("jvm") version Versions.kotlin
+    application
 }
 
 dependencies {
@@ -29,4 +30,8 @@ allprojects {
 
 val test by tasks.getting(Test::class) {
     useJUnitPlatform()
+}
+
+application {
+    mainClassName = "io.github.dector.pipes.ApplicationKt"
 }
