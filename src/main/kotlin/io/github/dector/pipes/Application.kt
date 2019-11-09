@@ -20,6 +20,7 @@ class Application(private val terminal: Terminal) {
     private val height = terminal.terminalSize.rows
 
     private val scope = CoroutineScope(SupervisorJob())
+    private val rnd = Random.Default
 
     init {
         terminal.setCursorVisible(false)
@@ -71,17 +72,17 @@ class Application(private val terminal: Terminal) {
         val y: Int
         val direction: GrowingDirection
 
-        val startHorizontally = Random.nextDouble() < 0.5
+        val startHorizontally = rnd.nextDouble() < 0.5
         if (startHorizontally) {
-            y = Random.nextInt(0 until height)
+            y = rnd.nextInt(0 until height)
 
-            val leftEdge = Random.nextDouble() < 0.5
+            val leftEdge = rnd.nextDouble() < 0.5
             x = if (leftEdge) 0 else (width - 1)
             direction = if (leftEdge) Right else Left
         } else {
-            x = Random.nextInt(0 until width)
+            x = rnd.nextInt(0 until width)
 
-            val topEdge = Random.nextDouble() < 0.5
+            val topEdge = rnd.nextDouble() < 0.5
             y = if (topEdge) 0 else (height - 1)
             direction = if (topEdge) Down else Up
         }
@@ -100,8 +101,6 @@ class Application(private val terminal: Terminal) {
         val xRange = 0 until width
         val yRange = 0 until height
 
-        terminal.setForegroundColor(color)
-
         val growingDirections = arrayOf(startingDirection, startingDirection)
         var x = startX
         var y = startY
@@ -109,11 +108,12 @@ class Application(private val terminal: Terminal) {
         while (canBuildMore) {
             val char = pipeSegmentChar(growingDirections)
 
+            terminal.setForegroundColor(color)
             terminal.setCursorPosition(x, y)
             terminal.putCharacter(char)
             terminal.flush()
 
-            growingDirections.shiftLeft { nextDirection(growingDirections.last()) }
+            growingDirections.shiftLeft { nextDirection(growingDirections.last(), rnd) }
             when (growingDirections.first()) {
                 Left -> x--
                 Right -> x++
@@ -123,7 +123,7 @@ class Application(private val terminal: Terminal) {
 
             canBuildMore = (x in xRange) && (y in yRange)
 
-            delay(20)
+            delay(1000)
         }
     }
 }
@@ -132,11 +132,11 @@ private enum class GrowingDirection {
     Left, Right, Up, Down
 }
 
-private fun nextDirection(currentDirection: GrowingDirection): GrowingDirection {
-    val makeTurn = Random.nextDouble() < 0.1
+private fun nextDirection(currentDirection: GrowingDirection, rnd: Random): GrowingDirection {
+    val makeTurn = rnd.nextDouble() < 0.1
     if (!makeTurn) return currentDirection
 
-    val turnLeft = Random.nextDouble() < 0.5
+    val turnLeft = rnd.nextDouble() < 0.5
     return if (turnLeft) {
         when (currentDirection) {
             Left -> Down
