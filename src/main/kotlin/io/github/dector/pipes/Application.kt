@@ -11,10 +11,14 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlin.random.Random
 import kotlin.random.nextInt
 
 class Application(private val terminal: Terminal) {
+
+    private val CONCURRENT_PIPES = 3
 
     private val width = terminal.terminalSize.columns
     private val height = terminal.terminalSize.rows
@@ -25,6 +29,8 @@ class Application(private val terminal: Terminal) {
     init {
         terminal.setCursorVisible(false)
     }
+
+    private val mutex = Mutex()
 
     fun run() {
         /*drawFrame(0, 0, height - 1, width - 1)*/
@@ -57,9 +63,7 @@ class Application(private val terminal: Terminal) {
 */
 
     private fun drawPipes() {
-        val concurrentPipes = 1
-
-        repeat(concurrentPipes) {
+        repeat(CONCURRENT_PIPES) {
             launchPipe()
         }
     }
@@ -108,10 +112,12 @@ class Application(private val terminal: Terminal) {
         while (canBuildMore) {
             val char = pipeSegmentChar(growingDirections)
 
-            terminal.setForegroundColor(color)
-            terminal.setCursorPosition(x, y)
-            terminal.putCharacter(char)
-            terminal.flush()
+            mutex.withLock {
+                terminal.setForegroundColor(color)
+                terminal.setCursorPosition(x, y)
+                terminal.putCharacter(char)
+                terminal.flush()
+            }
 
             growingDirections.shiftLeft { nextDirection(growingDirections.last(), rnd) }
             when (growingDirections.first()) {
