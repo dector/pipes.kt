@@ -8,6 +8,9 @@ dependencies {
     implementation(kotlin("stdlib-jdk8"))
     implementation(Deps.kotlin_coroutines)
 
+    implementation(Deps.lanterna)
+    //implementation(Deps.jline)
+
     testImplementation(Deps.kotlin_test)
 }
 
