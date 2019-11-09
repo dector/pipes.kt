@@ -1,9 +1,6 @@
 package io.github.dector.pipes
 
-import com.googlecode.lanterna.TerminalSize
 import com.googlecode.lanterna.terminal.DefaultTerminalFactory
-import com.googlecode.lanterna.terminal.swing.AWTTerminalFontConfiguration
-import java.awt.Font
 
 fun main() {
     launchApp()

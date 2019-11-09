@@ -54,16 +54,27 @@ class Application(private val terminal: Terminal) {
     }
 
     private fun drawPipes() {
-        scope.launch {
-            while (true) {
-                val x = Random.nextInt(1 until (width - 1))
-                val color = listOf(ANSI.BLUE, ANSI.RED, ANSI.YELLOW, ANSI.MAGENTA, ANSI.GREEN, ANSI.MAGENTA)
-                    .random()
+        val concurrentPipes = 1
 
-                drawPipe(x, color)
-            }
+        repeat(concurrentPipes) {
+            launchPipe()
         }
+    }
 
+    private fun launchPipe(doAfter: () -> Unit) {
+        val color = listOf(ANSI.BLUE, ANSI.RED, ANSI.YELLOW, ANSI.MAGENTA, ANSI.GREEN, ANSI.MAGENTA)
+            .random()
+
+        scope.launch {
+            val x = Random.nextInt(1 until (width - 1))
+
+            drawPipe(x, color)
+            doAfter()
+        }
+    }
+
+    private fun launchPipe() {
+        launchPipe(doAfter = { launchPipe() })
     }
 
     private suspend fun drawPipe(startX: Int, color: TextColor) {
