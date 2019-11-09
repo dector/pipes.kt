@@ -103,11 +103,23 @@ private enum class GrowingDirection {
 }
 
 private fun nextDirection(currentDirection: GrowingDirection): GrowingDirection {
-    var newDirection: GrowingDirection = GrowingDirection.values().random()
+    val makeTurn = Random.nextDouble() < 0.1
+    if (!makeTurn) return currentDirection
 
-    while (newDirection == currentDirection) {
-        newDirection = GrowingDirection.values().random()
+    val turnLeft = Random.nextDouble() < 0.5
+    return if (turnLeft) {
+        when (currentDirection) {
+            Left -> Down
+            Right -> Up
+            Up -> Left
+            Down -> Right
+        }
+    } else {
+        when (currentDirection) {
+            Left -> Up
+            Right -> Down
+            Up -> Right
+            Down -> Left
+        }
     }
-
-    return newDirection
 }
