@@ -67,10 +67,27 @@ class Application(private val terminal: Terminal) {
         val color = listOf(ANSI.BLUE, ANSI.RED, ANSI.YELLOW, ANSI.MAGENTA, ANSI.GREEN, ANSI.MAGENTA)
             .random()
 
-        scope.launch {
-            val x = Random.nextInt(1 until (width - 1))
+        val x: Int
+        val y: Int
+        val direction: GrowingDirection
 
-            drawPipe(x, color)
+        val startHorizontally = Random.nextDouble() < 0.5
+        if (startHorizontally) {
+            y = Random.nextInt(0 until height)
+
+            val leftEdge = Random.nextDouble() < 0.5
+            x = if (leftEdge) 0 else (width - 1)
+            direction = if (leftEdge) Right else Left
+        } else {
+            x = Random.nextInt(0 until width)
+
+            val topEdge = Random.nextDouble() < 0.5
+            y = if (topEdge) 0 else (height - 1)
+            direction = if (topEdge) Down else Up
+        }
+
+        scope.launch {
+            drawPipe(x, y, direction, color)
             doAfter()
         }
     }
@@ -79,15 +96,13 @@ class Application(private val terminal: Terminal) {
         launchPipe(doAfter = { launchPipe() })
     }
 
-    private suspend fun drawPipe(startX: Int, color: TextColor) {
+    private suspend fun drawPipe(startX: Int, startY: Int, startingDirection: GrowingDirection, color: TextColor) {
         val xRange = 0 until width
         val yRange = 0 until height
 
-        val startY = height - 1
-
         terminal.setForegroundColor(color)
 
-        val growingDirections = arrayOf(Up, Up)
+        val growingDirections = arrayOf(startingDirection, startingDirection)
         var x = startX
         var y = startY
         var canBuildMore = true
@@ -147,7 +162,7 @@ private fun pipeSegmentChar(directions: Array<GrowingDirection>): Char {
         Up -> when (b) {
             Up -> '║'
             Down -> '║'
-            Left ->'╗'
+            Left -> '╗'
             Right -> '╔'
         }
         Down -> when (b) {
