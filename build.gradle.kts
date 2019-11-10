@@ -10,7 +10,7 @@ dependencies {
     implementation(Deps.kotlin_coroutines)
 
     implementation(Deps.lanterna)
-    //implementation(Deps.jline)
+    implementation(Deps.jline)
 
     testImplementation(Deps.kotlin_test)
 }

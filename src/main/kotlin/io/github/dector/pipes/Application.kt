@@ -1,8 +1,5 @@
 package io.github.dector.pipes
 
-import com.googlecode.lanterna.TextColor
-import com.googlecode.lanterna.TextColor.ANSI
-import com.googlecode.lanterna.terminal.Terminal
 import io.github.dector.pipes.GrowingDirection.Down
 import io.github.dector.pipes.GrowingDirection.Left
 import io.github.dector.pipes.GrowingDirection.Right
@@ -16,18 +13,15 @@ import kotlinx.coroutines.sync.withLock
 import kotlin.random.Random
 import kotlin.random.nextInt
 
-class Application(private val terminal: Terminal) {
+class Application(private val terminal: Term) {
 
     private val CONCURRENT_PIPES = 3
-
-    private val width = terminal.terminalSize.columns
-    private val height = terminal.terminalSize.rows
 
     private val scope = CoroutineScope(SupervisorJob())
     private val rnd = Random.Default
 
     init {
-        terminal.setCursorVisible(false)
+        terminal.hideCursor()
     }
 
     private val mutex = Mutex()
@@ -69,8 +63,7 @@ class Application(private val terminal: Terminal) {
     }
 
     private fun launchPipe(doAfter: () -> Unit) {
-        val color = listOf(ANSI.BLUE, ANSI.RED, ANSI.YELLOW, ANSI.MAGENTA, ANSI.GREEN, ANSI.MAGENTA)
-            .random()
+        val color = Color.values().random()
 
         val x: Int
         val y: Int
@@ -78,16 +71,16 @@ class Application(private val terminal: Terminal) {
 
         val startHorizontally = rnd.nextDouble() < 0.5
         if (startHorizontally) {
-            y = rnd.nextInt(0 until height)
+            y = rnd.nextInt(0 until terminal.height)
 
             val leftEdge = rnd.nextDouble() < 0.5
-            x = if (leftEdge) 0 else (width - 1)
+            x = if (leftEdge) 0 else (terminal.width - 1)
             direction = if (leftEdge) Right else Left
         } else {
-            x = rnd.nextInt(0 until width)
+            x = rnd.nextInt(0 until terminal.width)
 
             val topEdge = rnd.nextDouble() < 0.5
-            y = if (topEdge) 0 else (height - 1)
+            y = if (topEdge) 0 else (terminal.height - 1)
             direction = if (topEdge) Down else Up
         }
 
@@ -101,9 +94,9 @@ class Application(private val terminal: Terminal) {
         launchPipe(doAfter = { launchPipe() })
     }
 
-    private suspend fun drawPipe(startX: Int, startY: Int, startingDirection: GrowingDirection, color: TextColor) {
-        val xRange = 0 until width
-        val yRange = 0 until height
+    private suspend fun drawPipe(startX: Int, startY: Int, startingDirection: GrowingDirection, color: Color) {
+        val xRange = 0 until terminal.width
+        val yRange = 0 until terminal.height
 
         val growingDirections = arrayOf(startingDirection, startingDirection)
         var x = startX
@@ -113,9 +106,8 @@ class Application(private val terminal: Terminal) {
             val char = pipeSegmentChar(growingDirections)
 
             mutex.withLock {
-                terminal.setForegroundColor(color)
-                terminal.setCursorPosition(x, y)
-                terminal.putCharacter(char)
+                terminal.setTextColor(color)
+                terminal.printAt(x, y, char)
                 terminal.flush()
             }
 
